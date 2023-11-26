@@ -7,6 +7,7 @@ from django.conf import settings
 import tensorflow_hub as hub
 from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse
+import tensorflow as tf
 
 
 @require_GET
@@ -37,19 +38,26 @@ def detection(request):
 
 
 def detect_maturity_level(image_path):
-    custom_objects = {'KerasLayer': hub.KerasLayer}
-    model = load_model(os.path.join(settings.BASE_DIR, 'website/model/coffee_model.h5'), custom_objects=custom_objects)
+    model = os.path.join(settings.BASE_DIR, 'website/model/coffee_model.tflite')
+    interpreter = tf.lite.Interpreter(model_path=model)
+    interpreter.allocate_tensors()
 
     # Praproses gambar
     img = image.load_img(image_path, target_size=(224, 224))
     img_array = image.img_to_array(img)
     img_array = img_array / 255.0
     img_array = np.expand_dims(img_array, axis=0)
-
-    # Lakukan prediksi
-    predictions = model.predict(img_array)
     
-    print(predictions)
+    # Set input tensor
+    input_tensor_index = interpreter.get_input_details()[0]['index']
+    interpreter.set_tensor(input_tensor_index, img_array)
+    
+    # Run inference
+    interpreter.invoke()
+    
+    # Get the output tensor
+    output_tensor_index = interpreter.get_output_details()[0]['index']
+    predictions = interpreter.get_tensor(output_tensor_index)
     
     predicted_class = np.argmax(predictions)
 

@@ -6,7 +6,6 @@ from keras.layers import Dense
 import keras
 
 train_data_dir = 'website/dataset/train/'
-validation_data_dir = 'website/dataset/validation/'
 
 img_size = (224, 224)
 batch_size = 32
@@ -52,4 +51,9 @@ model.fit(
     validation_data=validation_generator
 )
 
-model.save('website/model/coffee_model.h5')
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+with open("website/coffee_model.tflite", "wb") as f:
+    f.write(tflite_model)
+    
+# model.save('website/model/coffee_model.h5')
