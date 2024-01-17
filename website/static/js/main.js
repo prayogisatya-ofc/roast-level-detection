@@ -7,7 +7,8 @@ Vue.createApp({
             previewImage: null,
             level: null,
             progress: 0,
-            status: ''
+            status: '',
+            predictions: []
         }
     },
     delimiters: ['[[', ']]'],
@@ -36,7 +37,8 @@ Vue.createApp({
                     setTimeout(() => {
                         this.isLoading = false
                         if(result.data.status){
-                            this.level = result.data.level
+                            this.level = result.data.results.level
+                            this.predictions = result.data.results.predictions
                         } else {
                             Swal.fire({
                                 icon: "warning",
@@ -53,6 +55,7 @@ Vue.createApp({
             this.previewImage = null
             this.image = null
             this.level = null
+            this.predictions.length = 0
             this.progress = 0
 
             const file = e.target.files[0]

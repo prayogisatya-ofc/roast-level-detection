@@ -31,7 +31,7 @@ def detection(request):
         
         os.remove(temp_path)
         
-        result['level'] = level
+        result['results'] = level
         result['status'] = True
         
     return JsonResponse(result)
@@ -65,4 +65,30 @@ def detect_maturity_level(image_path):
     maturity_levels = ['dark', 'light', 'light-medium', 'medium', 'medium-dark']
     predicted_maturity_level = maturity_levels[predicted_class]
 
-    return predicted_maturity_level
+    responses = {
+        "predictions": [
+            {
+                "type": "light",
+                "value": str(round(predictions[0][1] * 100, 2))
+            },
+            {
+                "type": "light-medium",
+                "value": str(round(predictions[0][2] * 100, 2))
+            },
+            {
+                "type": "medium",
+                "value": str(round(predictions[0][3] * 100, 2))
+            },
+            {
+                "type": "medium-dark",
+                "value": str(round(predictions[0][4] * 100, 2))
+            },
+            {
+                "type": "dark",
+                "value": str(round(predictions[0][0] * 100, 2))
+            },
+        ],
+        "level": predicted_maturity_level
+    }
+
+    return responses
